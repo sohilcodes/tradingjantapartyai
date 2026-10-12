@@ -1,4 +1,8 @@
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
 
 :root {
   --bg-deep: #060914;
@@ -27,8 +31,9 @@ html, body {
 body {
   min-height: 100vh;
   min-height: 100dvh;
-  background: linear-gradient(165deg, #060914 0%, #0c1228 40%, #0a0f1f 70%, #0d0a1a 100%);
-  background-attachment: fixed;
+  background: 
+    linear-gradient(rgba(6, 9, 20, 0.82), rgba(6, 9, 20, 0.88)),
+    url('/assets/bg.jpg') center/cover no-repeat fixed;
 }
 
 .screen {
@@ -38,8 +43,11 @@ body {
   flex-direction: column;
 }
 
-[hidden] { display: none !important; }
+[hidden] {
+  display: none !important;
+}
 
+/* ===== LOGIN ===== */
 #loginScreen {
   align-items: center;
   justify-content: center;
@@ -49,18 +57,31 @@ body {
 .login-card {
   width: 100%;
   max-width: 380px;
-  background: var(--bg-card);
+  background: rgba(13, 18, 32, 0.92);
   border: 1px solid var(--border);
   border-radius: 20px;
   padding: 36px 28px 32px;
   box-shadow: 0 0 40px var(--accent-glow), 0 20px 60px rgba(0,0,0,0.5);
   animation: fadeIn 0.5s ease;
+  backdrop-filter: blur(12px);
 }
 
-.logo-area { text-align: center; margin-bottom: 32px; }
+.logo-area {
+  text-align: center;
+  margin-bottom: 28px;
+}
+
+.logo-img {
+  width: 90px;
+  height: 90px;
+  object-fit: contain;
+  margin-bottom: 14px;
+  border-radius: 18px;
+  box-shadow: 0 4px 20px rgba(107, 92, 255, 0.3);
+}
 
 .brand {
-  font-size: 1.45rem;
+  font-size: 1.4rem;
   font-weight: 700;
   letter-spacing: 0.04em;
   background: linear-gradient(135deg, #a78bfa, #6b5cff, #35ee8a);
@@ -69,14 +90,22 @@ body {
   background-clip: text;
 }
 
-.tagline { margin-top: 8px; font-size: 0.9rem; color: var(--text-muted); }
+.tagline {
+  margin-top: 8px;
+  font-size: 0.9rem;
+  color: var(--text-muted);
+}
 
-.input-group { margin-bottom: 20px; }
+.input-group {
+  margin-bottom: 20px;
+}
+
 .input-group label {
   display: block;
   font-size: 0.8rem;
   color: var(--text-muted);
   margin-bottom: 8px;
+  letter-spacing: 0.03em;
 }
 
 .input-group input {
@@ -88,6 +117,7 @@ body {
   color: var(--text);
   font-size: 1rem;
   outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
 }
 
 .input-group input:focus {
@@ -109,7 +139,9 @@ body {
   box-shadow: 0 4px 20px var(--accent-glow);
 }
 
-.btn-primary:active { transform: scale(0.98); }
+.btn-primary:active {
+  transform: scale(0.98);
+}
 
 .error-msg {
   margin-top: 14px;
@@ -118,8 +150,16 @@ body {
   font-size: 0.9rem;
 }
 
-.login-footer { margin-top: 28px; text-align: center; }
-.login-footer p { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 6px; }
+.login-footer {
+  margin-top: 28px;
+  text-align: center;
+}
+
+.login-footer p {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+}
 
 .telegram-link {
   color: #5b9dff;
@@ -128,17 +168,31 @@ body {
   font-size: 0.95rem;
 }
 
+/* ===== HEADER ===== */
 .top-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 16px 18px 12px;
-  background: rgba(13, 18, 32, 0.85);
+  padding: 14px 18px 12px;
+  background: rgba(13, 18, 32, 0.9);
   border-bottom: 1px solid var(--border);
   backdrop-filter: blur(12px);
   position: sticky;
   top: 0;
   z-index: 50;
+}
+
+.header-logo-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.header-logo {
+  width: 38px;
+  height: 38px;
+  object-fit: contain;
+  border-radius: 10px;
 }
 
 .app-title {
@@ -151,7 +205,11 @@ body {
   background-clip: text;
 }
 
-.selected-pair { font-size: 0.8rem; color: var(--text-muted); margin-top: 2px; }
+.selected-pair {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  margin-top: 1px;
+}
 
 .logout-btn {
   padding: 8px 14px;
@@ -164,8 +222,11 @@ body {
   cursor: pointer;
 }
 
-.logout-btn:active { background: rgba(255, 88, 118, 0.15); }
+.logout-btn:active {
+  background: rgba(255, 88, 118, 0.15);
+}
 
+/* ===== BODY ===== */
 .terminal-body {
   flex: 1;
   padding: 16px 18px 32px;
@@ -177,7 +238,11 @@ body {
   gap: 14px;
 }
 
-.controls-row { display: flex; gap: 8px; flex-wrap: wrap; }
+.controls-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
 
 .chip-btn {
   flex: 1;
@@ -193,7 +258,10 @@ body {
   white-space: nowrap;
 }
 
-.chip-btn:active { background: rgba(107, 92, 255, 0.2); }
+.chip-btn:active {
+  background: rgba(107, 92, 255, 0.2);
+}
+
 .chip-btn.active {
   border-color: var(--accent);
   background: rgba(107, 92, 255, 0.18);
@@ -230,8 +298,9 @@ body {
   box-shadow: 0 0 0 3px var(--accent-glow);
 }
 
+/* ===== SCAN CARD ===== */
 .scan-card {
-  background: var(--bg-card);
+  background: rgba(13, 18, 32, 0.9);
   border: 1px solid var(--border);
   border-radius: var(--radius);
   padding: 28px 20px;
@@ -244,8 +313,13 @@ body {
   box-shadow: 0 0 30px rgba(107, 92, 255, 0.12);
 }
 
-.scan-card.scanning { border-color: rgba(107, 92, 255, 0.5); }
-.scan-card.has-result { border-color: rgba(53, 238, 138, 0.35); }
+.scan-card.scanning {
+  border-color: rgba(107, 92, 255, 0.5);
+}
+
+.scan-card.has-result {
+  border-color: rgba(53, 238, 138, 0.35);
+}
 
 .spinner {
   width: 42px;
@@ -258,9 +332,15 @@ body {
 }
 
 .scan-card.has-result .spinner,
-.scan-card.waiting .spinner { display: none; }
+.scan-card.waiting .spinner {
+  display: none;
+}
 
-.scan-text { font-size: 1rem; color: var(--text-muted); font-weight: 500; }
+.scan-text {
+  font-size: 1rem;
+  color: var(--text-muted);
+  font-weight: 500;
+}
 
 .entry-text {
   margin-top: 10px;
@@ -314,8 +394,9 @@ body {
   font-weight: 500;
 }
 
+/* ===== COUNTDOWN ===== */
 .countdown-area {
-  background: var(--bg-card);
+  background: rgba(13, 18, 32, 0.9);
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
   padding: 12px 14px;
@@ -328,7 +409,10 @@ body {
   margin-bottom: 8px;
 }
 
-.countdown-label { font-size: 0.8rem; color: var(--text-muted); }
+.countdown-label {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
 
 .countdown-value {
   font-size: 0.95rem;
@@ -352,8 +436,9 @@ body {
   transition: width 0.3s linear;
 }
 
+/* ===== CHART ===== */
 .chart-card {
-  background: var(--bg-card);
+  background: rgba(13, 18, 32, 0.9);
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
   padding: 10px;
@@ -366,6 +451,7 @@ body {
   border-radius: 6px;
 }
 
+/* ===== BUTTON ===== */
 .btn-signal {
   width: 100%;
   padding: 18px;
@@ -381,8 +467,14 @@ body {
   margin-top: 4px;
 }
 
-.btn-signal:active:not(:disabled) { transform: scale(0.97); }
-.btn-signal:disabled { opacity: 0.55; cursor: not-allowed; }
+.btn-signal:active:not(:disabled) {
+  transform: scale(0.97);
+}
+
+.btn-signal:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
 
 .disclaimer {
   font-size: 0.7rem;
@@ -392,19 +484,26 @@ body {
   opacity: 0.75;
 }
 
-@keyframes spin { to { transform: rotate(360deg); } }
+/* ===== ANIMATIONS ===== */
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(12px); }
   to { opacity: 1; transform: translateY(0); }
 }
+
 @keyframes popIn {
   from { opacity: 0; transform: scale(0.7); }
   to { opacity: 1; transform: scale(1); }
 }
 
+/* ===== MOBILE ===== */
 @media (max-width: 380px) {
   .login-card { padding: 28px 20px 24px; }
-  .brand { font-size: 1.25rem; }
+  .brand { font-size: 1.2rem; }
+  .logo-img { width: 75px; height: 75px; }
   .sticker { width: 110px; height: 110px; }
   .direction { font-size: 1.4rem; }
   .chip-btn { font-size: 0.72rem; padding: 9px 6px; }

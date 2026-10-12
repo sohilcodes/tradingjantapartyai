@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#0a0e1a">
+  <title>Trading Janta Party</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="loginScreen" class="screen">
+    <div class="login-card">
+      <div class="logo-area">
+        <h1 class="brand">TRADING JANTA PARTY</h1>
+        <p class="tagline">Private OTC signal Panel</p>
+      </div>
+      <form id="loginForm" autocomplete="off">
+        <div class="input-group">
+          <label for="password">Enter access password</label>
+          <input type="password" id="password" name="password" placeholder="••••••••" required autocomplete="current-password">
+        </div>
+        <button type="submit" class="btn-primary" id="loginBtn">LOGIN</button>
+        <p id="loginError" class="error-msg" hidden>Wrong password</p>
+      </form>
+      <div class="login-footer">
+        <p>Don't have a password?</p>
+        <a href="https://t.me/tradingjantaaparty" target="_blank" rel="noopener" class="telegram-link">@Sohilcodes</a>
+      </div>
+    </div>
+  </div>
+
+  <div id="mainScreen" class="screen" hidden>
+    <header class="top-header">
+      <div class="header-left">
+        <h1 class="app-title">TJP OTC</h1>
+        <p id="pairTitle" class="selected-pair">EUR/USD OTC</p>
+      </div>
+      <button id="logout" class="logout-btn" type="button">Logout</button>
+    </header>
+
+    <main class="terminal-body">
+      <div class="controls-row">
+        <button id="pairBtn" class="chip-btn" type="button">Pair Badlo</button>
+        <button id="soundBtn" class="chip-btn" type="button">Sound ON</button>
+        <button id="musicBtn" class="chip-btn" type="button">Music OFF</button>
+      </div>
+
+      <div class="field-group">
+        <label for="pair">OTC PAIR</label>
+        <select id="pair" class="select-input"></select>
+      </div>
+
+      <div class="field-group">
+        <label for="timeframe">TIMEFRAME</label>
+        <select id="timeframe" class="select-input"></select>
+      </div>
+
+      <div class="scan-card" id="scanCard">
+        <div id="spinner" class="spinner"></div>
+        <p id="scanText" class="scan-text">Ready for signal</p>
+        <p id="entryText" class="entry-text" hidden></p>
+        <div id="liveResult" class="live-result" hidden>
+          <img id="liveSticker" class="sticker" src="" alt="Signal sticker">
+          <div id="liveDirection" class="direction"></div>
+          <div id="liveInfo" class="live-info"></div>
+        </div>
+      </div>
+
+      <p id="successMsg" class="success-msg" hidden>✓ Algo signal generated successfully</p>
+
+      <div class="countdown-area">
+        <div class="countdown-row">
+          <span class="countdown-label">Agla Signal</span>
+          <span id="countdown" class="countdown-value">--</span>
+        </div>
+        <div class="progress-track">
+          <div id="progressBar" class="progress-bar"></div>
+        </div>
+      </div>
+
+      <div class="chart-card">
+        <canvas id="chart" width="320" height="120"></canvas>
+      </div>
+
+      <button id="getSignal" class="btn-signal" type="button">GET SIGNAL</button>
+      <p class="disclaimer">Demo / informational signals only. Not financial advice. No guaranteed accuracy.</p>
+    </main>
+  </div>
+  <script src="app.js"></script>
+</body>
+</html>

@@ -5,7 +5,7 @@ const path = require('path');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-const ACCESS_PASSWORD = 'zavian@532#$';
+const ACCESS_PASSWORD = 'TJPHACK786';
 const activeTokens = new Set();
 
 app.use(express.json());

@@ -4,13 +4,15 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <meta name="theme-color" content="#0a0e1a">
-  <title>Trading Janta Party</title>
+  <title>Trading Janta Party Ai</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
+  <!-- LOGIN SCREEN -->
   <div id="loginScreen" class="screen">
     <div class="login-card">
       <div class="logo-area">
+        <img src="/assets/logo.png" alt="Logo" class="logo-img">
         <h1 class="brand">TRADING JANTA PARTY</h1>
         <p class="tagline">Private OTC signal Panel</p>
       </div>
@@ -24,16 +26,22 @@
       </form>
       <div class="login-footer">
         <p>Don't have a password?</p>
-        <a href="https://t.me/tradingjantaaparty" target="_blank" rel="noopener" class="telegram-link">@Sohilcodes</a>
+        <a href="https://t.me/tradingjantaaparty" target="_blank" rel="noopener" class="telegram-link">@tradingjantaaparty</a>
       </div>
     </div>
   </div>
 
+  <!-- MAIN TERMINAL -->
   <div id="mainScreen" class="screen" hidden>
     <header class="top-header">
       <div class="header-left">
-        <h1 class="app-title">TJP OTC</h1>
-        <p id="pairTitle" class="selected-pair">EUR/USD OTC</p>
+        <div class="header-logo-row">
+          <img src="/assets/logo.png" alt="Logo" class="header-logo">
+          <div>
+            <h1 class="app-title">TJP OTC</h1>
+            <p id="pairTitle" class="selected-pair">EUR/USD OTC</p>
+          </div>
+        </div>
       </div>
       <button id="logout" class="logout-btn" type="button">Logout</button>
     </header>
@@ -83,9 +91,10 @@
       </div>
 
       <button id="getSignal" class="btn-signal" type="button">GET SIGNAL</button>
-      <p class="disclaimer">Demo / informational signals only. Not financial advice. No guaranteed accuracy.</p>
+      <p class="disclaimer">Trading Janta Party Algo Ai bot</p>
     </main>
   </div>
+
   <script src="app.js"></script>
 </body>
 </html>

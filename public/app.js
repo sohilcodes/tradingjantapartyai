@@ -402,8 +402,7 @@
           const result = await r.json();
 
           // WIN / LOSS image
-          liveSticker.src =
-            result.result === 'WIN' ? '/assets/win.webp' : '/assets/loss.webp';
+          liveSticker.src = result.result === 'WIN' ? '/assets/win.webm' : '/assets/loss.webp';
           liveSticker.alt = result.result;
 
           liveDirection.textContent = result.result;

@@ -5,8 +5,13 @@ const path = require('path');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// ============ CHANGE THESE ============
 const ACCESS_PASSWORD = 'TJPHACK786';
+const TWELVE_API_KEY = '5739d9602c3e41d7a9df9a8bfda2892b';
+// ======================================
+
 const activeTokens = new Set();
+const pendingSignals = new Map();
 
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
@@ -21,16 +26,36 @@ const TIMEFRAMES = [
   '10 Seconds', '15 Seconds', '30 Seconds', '1 Minute', '5 Minutes'
 ];
 
-function generateSignal(pair, timeframe) {
+function toSymbol(pair) {
+  return pair.replace(' OTC', '').replace('/', '');
+}
+
+function toSeconds(tf) {
+  if (tf === '10 Seconds') return 10;
+  if (tf === '15 Seconds') return 15;
+  if (tf === '30 Seconds') return 30;
+  if (tf === '1 Minute') return 60;
+  if (tf === '5 Minutes') return 300;
+  return 60;
+}
+
+async function getPrice(pair) {
+  const symbol = toSymbol(pair);
+  const url = `https://api.twelvedata.com/price?symbol=\( {symbol}&apikey= \){TWELVE_API_KEY}`;
+  const res = await fetch(url);
+  const data = await res.json();
+  if (data.status === 'error' || !data.price) {
+    throw new Error(data.message || 'Price fetch failed');
+  }
+  return parseFloat(data.price);
+}
+
+function generateDirection(pair, timeframe) {
   const now = new Date();
   const minuteKey = `\( {now.getUTCFullYear()}- \){now.getUTCMonth()}-\( {now.getUTCDate()}- \){now.getUTCHours()}-${now.getUTCMinutes()}`;
   const seed = `\( {pair}| \){timeframe}|${minuteKey}`;
   const hash = crypto.createHash('sha256').update(seed).digest('hex');
-  const directionBit = parseInt(hash.substring(0, 2), 16);
-  const direction = directionBit % 2 === 0 ? 'CALL' : 'PUT';
-  const confRaw = parseInt(hash.substring(2, 4), 16);
-  const confidence = 55 + (confRaw % 31);
-  return { direction, pair, timeframe, confidence };
+  return parseInt(hash.substring(0, 2), 16) % 2 === 0 ? 'CALL' : 'PUT';
 }
 
 function requireAuth(req, res, next) {
@@ -42,6 +67,7 @@ function requireAuth(req, res, next) {
   if (!activeTokens.has(token)) {
     return res.status(401).json({ error: 'Unauthorized' });
   }
+  req.token = token;
   next();
 }
 
@@ -59,16 +85,82 @@ app.get('/api/config', (req, res) => {
   res.json({ pairs: PAIRS, timeframes: TIMEFRAMES });
 });
 
-app.post('/api/signal', requireAuth, (req, res) => {
-  const { pair, timeframe } = req.body || {};
-  if (!pair || !timeframe) {
-    return res.status(400).json({ error: 'Missing pair or timeframe' });
+app.post('/api/signal', requireAuth, async (req, res) => {
+  try {
+    const { pair, timeframe } = req.body || {};
+    if (!pair || !timeframe) {
+      return res.status(400).json({ error: 'Missing pair or timeframe' });
+    }
+    if (!PAIRS.includes(pair) || !TIMEFRAMES.includes(timeframe)) {
+      return res.status(400).json({ error: 'Invalid pair or timeframe' });
+    }
+
+    const entryPrice = await getPrice(pair);
+    const direction = generateDirection(pair, timeframe);
+    const confidence = 55 + Math.floor(Math.random() * 31);
+
+    const key = `\( {req.token}| \){pair}|${Date.now()}`;
+    pendingSignals.set(key, {
+      entryPrice,
+      direction,
+      pair,
+      timeframe,
+      entryTime: Date.now(),
+      seconds: toSeconds(timeframe)
+    });
+
+    setTimeout(() => pendingSignals.delete(key), 10 * 60 * 1000);
+
+    res.json({
+      signal: {
+        direction,
+        pair,
+        timeframe,
+        confidence,
+        entryPrice,
+        signalId: key
+      }
+    });
+  } catch (err) {
+    console.error('Signal error:', err.message);
+    res.status(500).json({ error: 'Unable to fetch price. Check API key or limit.' });
   }
-  if (!PAIRS.includes(pair) || !TIMEFRAMES.includes(timeframe)) {
-    return res.status(400).json({ error: 'Invalid pair or timeframe' });
+});
+
+app.post('/api/check-result', requireAuth, async (req, res) => {
+  try {
+    const { signalId } = req.body || {};
+    if (!signalId || !pendingSignals.has(signalId)) {
+      return res.status(400).json({ error: 'Invalid or expired signal' });
+    }
+
+    const sig = pendingSignals.get(signalId);
+    const exitPrice = await getPrice(sig.pair);
+
+    let result = 'LOSS';
+    if (sig.direction === 'CALL' && exitPrice > sig.entryPrice) result = 'WIN';
+    if (sig.direction === 'PUT' && exitPrice < sig.entryPrice) result = 'WIN';
+
+    const diff = exitPrice - sig.entryPrice;
+    const multiplier = sig.pair.includes('JPY') ? 100 : 10000;
+    const diffPips = (diff * multiplier).toFixed(1);
+
+    pendingSignals.delete(signalId);
+
+    res.json({
+      result,
+      direction: sig.direction,
+      pair: sig.pair,
+      timeframe: sig.timeframe,
+      entryPrice: sig.entryPrice,
+      exitPrice,
+      diff,
+      diffPips
+    });
+  } catch (err) {
+    console.error('Check result error:', err.message);
+    res.status(500).json({ error: 'Unable to fetch exit price' });
   }
-  const signal = generateSignal(pair, timeframe);
-  res.json({ signal });
 });
 
 app.get('/', (req, res) => {

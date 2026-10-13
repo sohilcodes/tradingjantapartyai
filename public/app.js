@@ -67,6 +67,7 @@
     entryText.textContent = '';
     liveResult.hidden = true;
     successMsg.hidden = true;
+    successMsg.style.color = '';
     scanCard.classList.remove('scanning', 'waiting', 'has-result');
     countdownEl.textContent = '--';
     progressBar.style.width = '0%';
@@ -74,7 +75,9 @@
     getSignalBtn.textContent = 'GET SIGNAL';
   }
 
-  function pad(n) { return n < 10 ? '0' + n : '' + n; }
+  function pad(n) {
+    return n < 10 ? '0' + n : '' + n;
+  }
 
   function formatTime(date) {
     return pad(date.getHours()) + ':' + pad(date.getMinutes()) + ':' + pad(date.getSeconds());
@@ -96,6 +99,15 @@
     const entry = new Date(now.getTime() + wait * 1000);
     entry.setMilliseconds(0);
     return entry;
+  }
+
+  function toWaitMs(tf) {
+    if (tf === '10 Seconds') return 10000;
+    if (tf === '15 Seconds') return 15000;
+    if (tf === '30 Seconds') return 30000;
+    if (tf === '1 Minute') return 60000;
+    if (tf === '5 Minutes') return 300000;
+    return 60000;
   }
 
   async function tryAutoLogin() {
@@ -136,7 +148,9 @@
     }
   });
 
-  logoutBtn.addEventListener('click', function () { showLogin(); });
+  logoutBtn.addEventListener('click', function () {
+    showLogin();
+  });
 
   async function loadConfig() {
     try {
@@ -161,7 +175,9 @@
         pairTitle.textContent = data.pairs[0];
       }
       if (data.timeframes.length) {
-        const preferred = data.timeframes.find(function (t) { return t === '1 Minute'; });
+        const preferred = data.timeframes.find(function (t) {
+          return t === '1 Minute';
+        });
         timeframeSelect.value = preferred || data.timeframes[0];
       }
     } catch (err) {
@@ -176,7 +192,9 @@
   pairBtn.addEventListener('click', function () {
     pairSelect.focus();
     if (typeof pairSelect.showPicker === 'function') {
-      try { pairSelect.showPicker(); } catch (_) {}
+      try {
+        pairSelect.showPicker();
+      } catch (_) {}
     }
   });
 
@@ -234,7 +252,10 @@
       ctx.lineWidth = 2;
       for (let i = 0; i < points; i++) {
         const x = (w / (points - 1)) * i;
-        const y = h / 2 + Math.sin(now * 0.4 + i * 0.35) * 28 + Math.cos(now * 0.25 + i * 0.2) * 12;
+        const y =
+          h / 2 +
+          Math.sin(now * 0.4 + i * 0.35) * 28 +
+          Math.cos(now * 0.25 + i * 0.2) * 12;
         if (i === 0) ctx.moveTo(x, y);
         else ctx.lineTo(x, y);
       }
@@ -260,6 +281,7 @@
     getSignalBtn.disabled = true;
     getSignalBtn.textContent = 'SCANNING...';
     successMsg.hidden = true;
+    successMsg.style.color = '';
     liveResult.hidden = true;
     scanCard.classList.remove('has-result');
     scanCard.classList.add('scanning');
@@ -313,7 +335,7 @@
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': 'Bearer ' + token
+          Authorization: 'Bearer ' + token
         },
         body: JSON.stringify({ pair: pair, timeframe: tf })
       });
@@ -322,11 +344,17 @@
         showLogin();
         return;
       }
-      if (!res.ok) throw new Error('Signal API error');
+      if (!res.ok) {
+        const err = await res.json().catch(function () {
+          return {};
+        });
+        throw new Error(err.error || 'Signal API error');
+      }
 
       const data = await res.json();
       const sig = data.signal;
 
+      // Show CALL / PUT first
       spinner.style.display = 'none';
       scanText.hidden = true;
       entryText.hidden = true;
@@ -338,19 +366,85 @@
       liveDirection.textContent = sig.direction;
       liveDirection.className = 'direction ' + sig.direction.toLowerCase();
 
-      liveInfo.innerHTML = sig.pair + ' • ' + sig.timeframe + '<br>Confidence ' + sig.confidence + '%';
+      liveInfo.innerHTML =
+        sig.pair +
+        ' • ' +
+        sig.timeframe +
+        '<br>Entry: ' +
+        sig.entryPrice +
+        '<br>Confidence ' +
+        sig.confidence +
+        '%';
 
       scanCard.classList.remove('scanning', 'waiting');
       scanCard.classList.add('has-result');
 
       successMsg.hidden = false;
+      successMsg.style.color = '#35ee8a';
+      successMsg.textContent = '✓ Signal generated • Waiting for result...';
       playBeep();
+
+      // After timeframe → check WIN / LOSS
+      const waitMs = toWaitMs(tf);
+
+      setTimeout(async function () {
+        try {
+          const r = await fetch('/api/check-result', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: 'Bearer ' + token
+            },
+            body: JSON.stringify({ signalId: sig.signalId })
+          });
+
+          if (!r.ok) throw new Error('Result check failed');
+          const result = await r.json();
+
+          // WIN / LOSS image
+          liveSticker.src =
+            result.result === 'WIN' ? '/assets/win.webp' : '/assets/loss.webp';
+          liveSticker.alt = result.result;
+
+          liveDirection.textContent = result.result;
+          liveDirection.className =
+            'direction ' + (result.result === 'WIN' ? 'call' : 'put');
+
+          liveInfo.innerHTML =
+            result.pair +
+            ' • ' +
+            result.timeframe +
+            '<br>Entry: ' +
+            result.entryPrice +
+            ' → Exit: ' +
+            result.exitPrice +
+            '<br><strong style="color:' +
+            (result.result === 'WIN' ? '#35ee8a' : '#ff5876') +
+            '">' +
+            result.result +
+            ' (' +
+            result.diffPips +
+            ' pips)</strong>';
+
+          successMsg.textContent =
+            result.result === 'WIN'
+              ? '✓ WIN — Price moved in your direction'
+              : '✗ LOSS — Price moved against signal';
+          successMsg.style.color =
+            result.result === 'WIN' ? '#35ee8a' : '#ff5876';
+
+          playBeep();
+        } catch (e) {
+          successMsg.textContent = 'Result check failed';
+          successMsg.style.color = '#ff5876';
+        }
+      }, waitMs);
     } catch (err) {
       spinner.style.display = 'none';
       scanText.hidden = false;
       scanText.textContent = 'SIGNAL ERROR';
       entryText.hidden = false;
-      entryText.textContent = 'Unable to generate signal';
+      entryText.textContent = err.message || 'Unable to generate signal';
       liveResult.hidden = true;
       scanCard.classList.remove('scanning', 'waiting');
     } finally {
@@ -362,7 +456,9 @@
   }
 
   function sleep(ms) {
-    return new Promise(function (r) { setTimeout(r, ms); });
+    return new Promise(function (r) {
+      setTimeout(r, ms);
+    });
   }
 
   tryAutoLogin();

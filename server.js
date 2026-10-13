@@ -26,8 +26,23 @@ const TIMEFRAMES = [
   '10 Seconds', '15 Seconds', '30 Seconds', '1 Minute', '5 Minutes'
 ];
 
+// FIXED: slash ke saath symbol (EUR/USD)
 function toSymbol(pair) {
-  return pair.replace(' OTC', '').replace('/', '');
+  const map = {
+    'EUR/USD OTC': 'EUR/USD',
+    'GBP/USD OTC': 'GBP/USD',
+    'USD/JPY OTC': 'USD/JPY',
+    'USD/CAD OTC': 'USD/CAD',
+    'USD/CHF OTC': 'USD/CHF',
+    'AUD/USD OTC': 'AUD/USD',
+    'AUD/CAD OTC': 'AUD/CAD',
+    'AUD/NZD OTC': 'AUD/NZD',
+    'NZD/CAD OTC': 'NZD/CAD',
+    'USD/BRL OTC': 'USD/BRL',
+    'USD/INR OTC': 'USD/INR',
+    'EUR/GBP OTC': 'EUR/GBP'
+  };
+  return map[pair] || pair.replace(' OTC', '');
 }
 
 function toSeconds(tf) {
@@ -41,7 +56,7 @@ function toSeconds(tf) {
 
 async function getPrice(pair) {
   const symbol = toSymbol(pair);
-  const url = `https://api.twelvedata.com/price?symbol=\( {symbol}&apikey= \){TWELVE_API_KEY}`;
+  const url = `https://api.twelvedata.com/price?symbol=\( {encodeURIComponent(symbol)}&apikey= \){TWELVE_API_KEY}`;
   const res = await fetch(url);
   const data = await res.json();
   if (data.status === 'error' || !data.price) {
